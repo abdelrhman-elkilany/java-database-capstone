@@ -1,4 +1,5 @@
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,6 +10,12 @@ public class DoctorService {
 
     @Autowired
     private DoctorRepository doctorRepository;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository; // Assuming there's an AppointmentRepository for availability checks
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder; // For password hashing and validation
 
     // 1. Get all doctors
     public List<Doctor> getAllDoctors() {
@@ -35,7 +42,7 @@ public class DoctorService {
             updatedDoctor.setSpecialty(doctorDetails.getSpecialty());
             updatedDoctor.setEmail(doctorDetails.getEmail());
             updatedDoctor.setPhone(doctorDetails.getPhone());
-            // You can add more fields to be updated
+            // Add more fields to be updated if necessary
             return doctorRepository.save(updatedDoctor);
         }
         return null; // Or throw an exception if the doctor is not found
@@ -64,5 +71,23 @@ public class DoctorService {
     // 8. Find doctors by last name
     public List<Doctor> getDoctorsByLastName(String lastName) {
         return doctorRepository.findByLastName(lastName);
+    }
+
+    // 9. Get a doctor's available time slots for a specific date
+    public List<TimeSlot> getDoctorAvailability(int doctorId, String date) {
+        // Assuming the Appointment entity stores the doctor's schedule
+        return appointmentRepository.findAvailableTimeSlotsByDoctorIdAndDate(doctorId, date);
+    }
+
+    // 10. Validate doctor login credentials (username/email and password)
+    public boolean validateDoctorLogin(String email, String password) {
+        Optional<Doctor> doctorOptional = doctorRepository.findByEmail(email);
+
+        if (doctorOptional.isPresent()) {
+            Doctor doctor = doctorOptional.get();
+            // Assuming the password is stored in a hashed format, we use BCrypt to compare
+            return passwordEncoder.matches(password, doctor.getPassword());
+        }
+        return false; // Return false if the doctor doesn't exist
     }
 }
