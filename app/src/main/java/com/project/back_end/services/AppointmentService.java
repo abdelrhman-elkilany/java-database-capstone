@@ -1,6 +1,7 @@
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,5 +58,10 @@ public class AppointmentService {
     // 7. Get appointments for a specific patient
     public List<Appointment> getAppointmentsByPatientId(int patientId) {
         return appointmentRepository.findByPatientId(patientId);
+    }
+
+    // 8. Get appointments for a specific doctor on a specific date
+    public List<Appointment> getAppointmentsByDoctorAndDate(int doctorId, LocalDate date) {
+        return appointmentRepository.findByDoctorIdAndAppointmentDate(doctorId, date);
     }
 }
