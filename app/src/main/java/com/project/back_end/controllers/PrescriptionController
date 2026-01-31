@@ -1,0 +1,70 @@
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/prescriptions")
+public class PrescriptionController {
+
+    // Injecting PrescriptionService to handle business logic
+    @Autowired
+    private PrescriptionService prescriptionService;
+
+    // 1. Get all prescriptions
+    @GetMapping
+    public ResponseEntity<List<Prescription>> getAllPrescriptions() {
+        List<Prescription> prescriptions = prescriptionService.getAllPrescriptions();
+        if (prescriptions.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(prescriptions, HttpStatus.OK);
+    }
+
+    // 2. Get a prescription by ID
+    @GetMapping("/{prescriptionId}")
+    public ResponseEntity<Prescription> getPrescriptionById(@PathVariable("prescriptionId") int prescriptionId) {
+        Optional<Prescription> prescription = prescriptionService.getPrescriptionById(prescriptionId);
+        if (prescription.isPresent()) {
+            return new ResponseEntity<>(prescription.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // 3. Create a new prescription
+    @PostMapping
+    public ResponseEntity<Prescription> createPrescription(@RequestBody Prescription prescription) {
+        Prescription newPrescription = prescriptionService.createPrescription(prescription);
+        return new ResponseEntity<>(newPrescription, HttpStatus.CREATED);
+    }
+
+    // 4. Update an existing prescription
+    @PutMapping("/{prescriptionId}")
+    public ResponseEntity<Prescription> updatePrescription(
+            @PathVariable("prescriptionId") int prescriptionId,
+            @RequestBody Prescription prescriptionDetails) {
+
+        Optional<Prescription> existingPrescription = prescriptionService.getPrescriptionById(prescriptionId);
+        if (existingPrescription.isPresent()) {
+            Prescription updatedPrescription = prescriptionService.updatePrescription(prescriptionId, prescriptionDetails);
+            return new ResponseEntity<>(updatedPrescription, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // 5. Delete a prescription
+    @DeleteMapping("/{prescriptionId}")
+    public ResponseEntity<HttpStatus> deletePrescription(@PathVariable("prescriptionId") int prescriptionId) {
+        boolean isDeleted = prescriptionService.deletePrescription(prescriptionId);
+        if (isDeleted) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+}
