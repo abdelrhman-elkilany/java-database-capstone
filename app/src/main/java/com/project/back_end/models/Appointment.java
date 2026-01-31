@@ -1,56 +1,68 @@
-import java.util.Date;
+import javax.persistence.*;
+import java.time.LocalDateTime;
 
+@Entity
 public class Appointment {
 
     // Attributes
-    private int appointmentId;
-    private int doctorId;
-    private int patientId;
-    private Date appointmentDate;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Automatically generates the Appointment ID
+    private Long appointmentId;
+
+    @ManyToOne
+    @JoinColumn(name = "doctorId", nullable = false)
+    private Doctor doctor;
+
+    @ManyToOne
+    @JoinColumn(name = "patientId", nullable = false)
+    private Patient patient;
+
+    private LocalDateTime appointmentTime;  // Using LocalDateTime for better precision
+
     private String status; // e.g., "Scheduled", "Completed", "Cancelled"
-    private Date createdAt;
+    
+    private LocalDateTime createdAt;
 
     // Constructor
-    public Appointment(int appointmentId, int doctorId, int patientId, Date appointmentDate, String status, Date createdAt) {
-        this.appointmentId = appointmentId;
-        this.doctorId = doctorId;
-        this.patientId = patientId;
-        this.appointmentDate = appointmentDate;
+    public Appointment(Doctor doctor, Patient patient, LocalDateTime appointmentTime, String status, LocalDateTime createdAt) {
+        this.doctor = doctor;
+        this.patient = patient;
+        this.appointmentTime = appointmentTime;
         this.status = status;
         this.createdAt = createdAt;
     }
 
     // Getters and Setters
-    public int getAppointmentId() {
+    public Long getAppointmentId() {
         return appointmentId;
     }
 
-    public void setAppointmentId(int appointmentId) {
+    public void setAppointmentId(Long appointmentId) {
         this.appointmentId = appointmentId;
     }
 
-    public int getDoctorId() {
-        return doctorId;
+    public Doctor getDoctor() {
+        return doctor;
     }
 
-    public void setDoctorId(int doctorId) {
-        this.doctorId = doctorId;
+    public void setDoctor(Doctor doctor) {
+        this.doctor = doctor;
     }
 
-    public int getPatientId() {
-        return patientId;
+    public Patient getPatient() {
+        return patient;
     }
 
-    public void setPatientId(int patientId) {
-        this.patientId = patientId;
+    public void setPatient(Patient patient) {
+        this.patient = patient;
     }
 
-    public Date getAppointmentDate() {
-        return appointmentDate;
+    public LocalDateTime getAppointmentTime() {
+        return appointmentTime;
     }
 
-    public void setAppointmentDate(Date appointmentDate) {
-        this.appointmentDate = appointmentDate;
+    public void setAppointmentTime(LocalDateTime appointmentTime) {
+        this.appointmentTime = appointmentTime;
     }
 
     public String getStatus() {
@@ -61,20 +73,20 @@ public class Appointment {
         this.status = status;
     }
 
-    public Date getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
     // Method to get a summary of the appointment details
     public String getAppointmentSummary() {
         return "Appointment ID: " + this.appointmentId + "\n" +
-                "Doctor ID: " + this.doctorId + "\n" +
-                "Patient ID: " + this.patientId + "\n" +
-                "Appointment Date: " + this.appointmentDate + "\n" +
+                "Doctor: " + this.doctor.getFullName() + "\n" +
+                "Patient: " + this.patient.getFullName() + "\n" +
+                "Appointment Time: " + this.appointmentTime + "\n" +
                 "Status: " + this.status + "\n" +
                 "Created At: " + this.createdAt;
     }
@@ -82,9 +94,9 @@ public class Appointment {
     // Method to display appointment details
     public void displayAppointmentDetails() {
         System.out.println("Appointment ID: " + this.appointmentId);
-        System.out.println("Doctor ID: " + this.doctorId);
-        System.out.println("Patient ID: " + this.patientId);
-        System.out.println("Appointment Date: " + this.appointmentDate);
+        System.out.println("Doctor: " + this.doctor.getFullName());
+        System.out.println("Patient: " + this.patient.getFullName());
+        System.out.println("Appointment Time: " + this.appointmentTime);
         System.out.println("Status: " + this.status);
         System.out.println("Created At: " + this.createdAt);
     }
@@ -94,9 +106,9 @@ public class Appointment {
     public String toString() {
         return "Appointment{" +
                 "appointmentId=" + appointmentId +
-                ", doctorId=" + doctorId +
-                ", patientId=" + patientId +
-                ", appointmentDate=" + appointmentDate +
+                ", doctor=" + doctor +
+                ", patient=" + patient +
+                ", appointmentTime=" + appointmentTime +
                 ", status='" + status + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
