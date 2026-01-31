@@ -4,6 +4,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.spec.SecretKeySpec;
+import java.security.Key;
 import java.util.Date;
 
 @Service
@@ -21,7 +23,7 @@ public class TokenService {
                 .setSubject(username) // Set the subject (username)
                 .setIssuedAt(new Date()) // Set the issued at date
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime)) // Set expiration time
-                .signWith(SignatureAlgorithm.HS256, secretKey) // Sign with HMAC using the secret key
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256) // Sign with HMAC using the secret key
                 .compact();
     }
 
@@ -45,7 +47,7 @@ public class TokenService {
     // Helper method to get claims from the token
     private Claims getClaims(String token) {
         return Jwts.parser()
-                .setSigningKey(secretKey) // Use the same secret key to parse
+                .setSigningKey(getSigningKey()) // Use the signing key
                 .parseClaimsJws(token)
                 .getBody(); // Return the claims part of the JWT
     }
@@ -54,5 +56,11 @@ public class TokenService {
     public boolean isTokenExpired(String token) {
         Claims claims = getClaims(token);
         return claims.getExpiration().before(new Date()); // Check if the token's expiration date is in the past
+    }
+
+    // Private method to retrieve or generate a signing key
+    private Key getSigningKey() {
+        // Using the secret key configured in properties to generate a SecretKeySpec
+        return new SecretKeySpec(secretKey.getBytes(), SignatureAlgorithm.HS256.getJcaName());
     }
 }
