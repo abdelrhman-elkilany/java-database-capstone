@@ -1,9 +1,15 @@
+import javax.persistence.*;
 import java.util.Date;
 
+@Entity
 public class Doctor {
 
+    // Primary Key
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Automatically generates the ID
+    private Long id;
+
     // Attributes
-    private int doctorId;
     private String firstName;
     private String lastName;
     private String specialty;
@@ -12,8 +18,7 @@ public class Doctor {
     private Date createdAt;
 
     // Constructor
-    public Doctor(int doctorId, String firstName, String lastName, String specialty, String email, String phone, Date createdAt) {
-        this.doctorId = doctorId;
+    public Doctor(String firstName, String lastName, String specialty, String email, String phone, Date createdAt) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.specialty = specialty;
@@ -23,12 +28,12 @@ public class Doctor {
     }
 
     // Getters and Setters
-    public int getDoctorId() {
-        return doctorId;
+    public Long getId() {
+        return id;
     }
 
-    public void setDoctorId(int doctorId) {
-        this.doctorId = doctorId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getFirstName() {
@@ -91,7 +96,7 @@ public class Doctor {
 
     // Method to display doctor's details (for example, in the console)
     public void displayDoctorDetails() {
-        System.out.println("Doctor ID: " + this.doctorId);
+        System.out.println("Doctor ID: " + this.id);
         System.out.println("Name: " + getFullName());
         System.out.println("Specialty: " + this.specialty);
         System.out.println("Contact Info: " + getContactInfo());
@@ -102,7 +107,7 @@ public class Doctor {
     @Override
     public String toString() {
         return "Doctor{" +
-                "doctorId=" + doctorId +
+                "id=" + id +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", specialty='" + specialty + '\'' +
