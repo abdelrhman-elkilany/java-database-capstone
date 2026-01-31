@@ -1,18 +1,25 @@
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/prescriptions")
+@Validated  // To enable validation for incoming requests
 public class PrescriptionController {
 
     // Injecting PrescriptionService to handle business logic
     @Autowired
     private PrescriptionService prescriptionService;
+
+    // Injecting TokenService to handle token validation
+    @Autowired
+    private TokenService tokenService;
 
     // 1. Get all prescriptions
     @GetMapping
@@ -37,7 +44,16 @@ public class PrescriptionController {
 
     // 3. Create a new prescription
     @PostMapping
-    public ResponseEntity<Prescription> createPrescription(@RequestBody Prescription prescription) {
+    public ResponseEntity<Prescription> createPrescription(
+            @RequestHeader("Authorization") String token,  // Assuming token is passed in the Authorization header
+            @Valid @RequestBody Prescription prescription) {
+
+        // Validate token
+        if (!tokenService.isValidToken(token)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        // If validation passes, create the prescription
         Prescription newPrescription = prescriptionService.createPrescription(prescription);
         return new ResponseEntity<>(newPrescription, HttpStatus.CREATED);
     }
@@ -45,8 +61,14 @@ public class PrescriptionController {
     // 4. Update an existing prescription
     @PutMapping("/{prescriptionId}")
     public ResponseEntity<Prescription> updatePrescription(
+            @RequestHeader("Authorization") String token,  // Token for validation
             @PathVariable("prescriptionId") int prescriptionId,
-            @RequestBody Prescription prescriptionDetails) {
+            @Valid @RequestBody Prescription prescriptionDetails) {
+
+        // Validate token
+        if (!tokenService.isValidToken(token)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
 
         Optional<Prescription> existingPrescription = prescriptionService.getPrescriptionById(prescriptionId);
         if (existingPrescription.isPresent()) {
@@ -59,7 +81,15 @@ public class PrescriptionController {
 
     // 5. Delete a prescription
     @DeleteMapping("/{prescriptionId}")
-    public ResponseEntity<HttpStatus> deletePrescription(@PathVariable("prescriptionId") int prescriptionId) {
+    public ResponseEntity<HttpStatus> deletePrescription(
+            @RequestHeader("Authorization") String token,  // Token for validation
+            @PathVariable("prescriptionId") int prescriptionId) {
+
+        // Validate token
+        if (!tokenService.isValidToken(token)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         boolean isDeleted = prescriptionService.deletePrescription(prescriptionId);
         if (isDeleted) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
