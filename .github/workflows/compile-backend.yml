@@ -21,5 +21,9 @@ jobs:
         with:
           java-version: '17'
 
+      # Change into the backend directory before running Maven build
+      - name: Change directory to backend
+        run: cd app  # Replace 'app' with the actual backend directory path
+
       - name: Build with Maven
-        run: mvn clean install
+        run: mvn clean install  # Or use './mvnw clean install' if using the Maven wrapper
