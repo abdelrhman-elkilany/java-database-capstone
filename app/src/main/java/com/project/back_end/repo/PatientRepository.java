@@ -16,5 +16,11 @@ public interface PatientRepository extends JpaRepository<Patient, Integer> {
     // Custom query to find patients by their email
     Optional<Patient> findByEmail(String email);
 
+    // Custom query to find patients by their phone number
+    Optional<Patient> findByPhone(String phone);
+
+    // New custom query to find patients by either email or phone number
+    Optional<Patient> findByEmailOrPhone(String email, String phone);
+
     // You can add more custom queries here based on your application’s needs
 }
