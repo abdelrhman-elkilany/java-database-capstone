@@ -3,6 +3,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,9 +11,11 @@ import java.util.Optional;
 @RequestMapping("/api/doctors")
 public class DoctorController {
 
-    // Injecting DoctorService which handles the business logic
     @Autowired
     private DoctorService doctorService;
+
+    @Autowired
+    private TokenService tokenService;  // Assuming TokenService handles token validation
 
     // 1. Get all doctors
     @GetMapping
@@ -62,6 +65,42 @@ public class DoctorController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // 6. Get doctor's availability
+    @GetMapping("/availability/{user}/{doctorId}/{date}/{token}")
+    public ResponseEntity<String> getDoctorAvailability(
+            @PathVariable("user") String user, 
+            @PathVariable("doctorId") int doctorId, 
+            @PathVariable("date") String dateStr, 
+            @PathVariable("token") String token) {
+        
+        // Token validation
+        if (!tokenService.isValidToken(token)) {
+            return new ResponseEntity<>("Invalid or expired token", HttpStatus.FORBIDDEN);
+        }
+
+        // Parse the date string into a LocalDate object
+        LocalDate appointmentDate = LocalDate.parse(dateStr);
+        
+        // Check user role (For demonstration purposes, assume it's "admin", "doctor", or "patient")
+        if (!user.equals("admin") && !user.equals("doctor") && !user.equals("patient")) {
+            return new ResponseEntity<>("Invalid user role", HttpStatus.FORBIDDEN);
+        }
+
+        // Fetch the doctor's availability
+        Optional<Doctor> doctor = doctorService.getDoctorById(doctorId);
+        if (!doctor.isPresent()) {
+            return new ResponseEntity<>("Doctor not found", HttpStatus.NOT_FOUND);
+        }
+
+        boolean isAvailable = doctorService.checkAvailability(doctorId, appointmentDate);
+        
+        if (isAvailable) {
+            return new ResponseEntity<>("Doctor is available", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Doctor is not available", HttpStatus.OK);
         }
     }
 }
